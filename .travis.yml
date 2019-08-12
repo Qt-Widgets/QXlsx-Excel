@@ -38,3 +38,16 @@ script:
 
 after_success:
 
+#-------------------------------
+addons:
+  sonarcloud:
+    organization: "qtexcel"
+    token:
+      secure: "f7d58a07ccc9b5915fbab1ef13bb876af6a03a5e" # encrypted value of your token
+
+script:
+  # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
+  - sonar-scanner
+ #------------------------------
+
+ 
