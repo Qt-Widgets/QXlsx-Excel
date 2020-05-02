@@ -46,6 +46,8 @@
 #include <QPointF>
 #include <QBuffer>
 #include <QDir>
+#include <QDebug>
+
 
 /*
 	From Wikipedia: The Open Packaging Conventions (OPC) is a
@@ -268,14 +270,14 @@ bool DocumentPrivate::savePackage(QIODevice *device) const
     for (int i = 0 ; i < worksheets.size(); ++i)
     {
 		QSharedPointer<AbstractSheet> sheet = worksheets[i];
-		contentTypes->addWorksheetName(QStringLiteral("sheet%1").arg(i+1));
+		contentTypes->addWorksheetName(QString("sheet%1").arg(i+1));
 		docPropsApp.addPartTitle(sheet->sheetName());
 
-		zipWriter.addFile(QStringLiteral("xl/worksheets/sheet%1.xml").arg(i+1), sheet->saveToXmlData());
+		zipWriter.addFile(QString("xl/worksheets/sheet%1.xml").arg(i+1), sheet->saveToXmlData());
 
 		Relationships *rel = sheet->relationships();
 		if (!rel->isEmpty())
-			zipWriter.addFile(QStringLiteral("xl/worksheets/_rels/sheet%1.xml.rels").arg(i+1), rel->saveToXmlData());
+			zipWriter.addFile(QString("xl/worksheets/_rels/sheet%1.xml.rels").arg(i+1), rel->saveToXmlData());
 	}
 
 	//save chartsheet xml files
@@ -285,25 +287,25 @@ bool DocumentPrivate::savePackage(QIODevice *device) const
     for (int i=0; i<chartsheets.size(); ++i)
     {
 		QSharedPointer<AbstractSheet> sheet = chartsheets[i];
-		contentTypes->addWorksheetName(QStringLiteral("sheet%1").arg(i+1));
+		contentTypes->addWorksheetName(QString("sheet%1").arg(i+1));
 		docPropsApp.addPartTitle(sheet->sheetName());
 
-		zipWriter.addFile(QStringLiteral("xl/chartsheets/sheet%1.xml").arg(i+1), sheet->saveToXmlData());
+		zipWriter.addFile(QString("xl/chartsheets/sheet%1.xml").arg(i+1), sheet->saveToXmlData());
 		Relationships *rel = sheet->relationships();
 		if (!rel->isEmpty())
-			zipWriter.addFile(QStringLiteral("xl/chartsheets/_rels/sheet%1.xml.rels").arg(i+1), rel->saveToXmlData());
+			zipWriter.addFile(QString("xl/chartsheets/_rels/sheet%1.xml.rels").arg(i+1), rel->saveToXmlData());
 	}
 
 	// save external links xml files
     for (int i=0; i<workbook->d_func()->externalLinks.count(); ++i)
     {
 		SimpleOOXmlFile *link = workbook->d_func()->externalLinks[i].data();
-		contentTypes->addExternalLinkName(QStringLiteral("externalLink%1").arg(i+1));
+		contentTypes->addExternalLinkName(QString("externalLink%1").arg(i+1));
 
-		zipWriter.addFile(QStringLiteral("xl/externalLinks/externalLink%1.xml").arg(i+1), link->saveToXmlData());
+		zipWriter.addFile(QString("xl/externalLinks/externalLink%1.xml").arg(i+1), link->saveToXmlData());
 		Relationships *rel = link->relationships();
 		if (!rel->isEmpty())
-			zipWriter.addFile(QStringLiteral("xl/externalLinks/_rels/externalLink%1.xml.rels").arg(i+1), rel->saveToXmlData());
+			zipWriter.addFile(QString("xl/externalLinks/_rels/externalLink%1.xml.rels").arg(i+1), rel->saveToXmlData());
 	}
 
 	// save workbook xml file
@@ -314,12 +316,12 @@ bool DocumentPrivate::savePackage(QIODevice *device) const
 	// save drawing xml files
     for (int i=0; i<workbook->drawings().size(); ++i)
     {
-		contentTypes->addDrawingName(QStringLiteral("drawing%1").arg(i+1));
+		contentTypes->addDrawingName(QString("drawing%1").arg(i+1));
 
 		Drawing *drawing = workbook->drawings()[i];
-		zipWriter.addFile(QStringLiteral("xl/drawings/drawing%1.xml").arg(i+1), drawing->saveToXmlData());
+		zipWriter.addFile(QString("xl/drawings/drawing%1.xml").arg(i+1), drawing->saveToXmlData());
 		if (!drawing->relationships()->isEmpty())
-			zipWriter.addFile(QStringLiteral("xl/drawings/_rels/drawing%1.xml.rels").arg(i+1), drawing->relationships()->saveToXmlData());
+			zipWriter.addFile(QString("xl/drawings/_rels/drawing%1.xml.rels").arg(i+1), drawing->relationships()->saveToXmlData());
 	}
 
 	// save docProps app/core xml file
@@ -353,9 +355,9 @@ bool DocumentPrivate::savePackage(QIODevice *device) const
 	// save chart xml files
     for (int i=0; i<workbook->chartFiles().size(); ++i)
     {
-		contentTypes->addChartName(QStringLiteral("chart%1").arg(i+1));
+		contentTypes->addChartName(QString("chart%1").arg(i+1));
 		QSharedPointer<Chart> cf = workbook->chartFiles()[i];
-		zipWriter.addFile(QStringLiteral("xl/charts/chart%1.xml").arg(i+1), cf->saveToXmlData());
+		zipWriter.addFile(QString("xl/charts/chart%1.xml").arg(i+1), cf->saveToXmlData());
 	}
 
 	// save image files
@@ -365,7 +367,7 @@ bool DocumentPrivate::savePackage(QIODevice *device) const
 		if (!mf->mimeType().isEmpty())
 			contentTypes->addDefault(mf->suffix(), mf->mimeType());
 
-		zipWriter.addFile(QStringLiteral("xl/media/image%1.%2").arg(i+1).arg(mf->suffix()), mf->contents());
+		zipWriter.addFile(QString("xl/media/image%1.%2").arg(i+1).arg(mf->suffix()), mf->contents());
 	}
 
 	// save root .rels xml file
@@ -1132,6 +1134,136 @@ bool Document::changeimage(int filenoinmidea, QString newfile)
 	return true;
 }
 // liufeijin }}
+
+
+/*!
+  Returns map of columns with there maximal width
+ */
+QMap<int, int> Document::getMaximalColumnWidth(int firstRow, int lastRow)
+{
+    const int defaultPixelSize = 11;    //Default font pixel size of excel?
+    int maxRows = -1;
+    int maxCols = -1;
+    QVector<CellLocation> cellLocation = currentWorksheet()->getFullCells(&maxRows, &maxCols);
+
+    QMap<int, int> colWidth;
+
+    for(int i=0; i < cellLocation.size(); i++)
+    {
+        int col = cellLocation.at(i).col;
+        int row = cellLocation.at(i).row;
+        int fs = cellLocation.at(i).cell->format().fontSize();
+        if( fs <= 0)
+        {
+            fs = defaultPixelSize;
+        }
+
+//        QString str = cellLocation.at(i).cell.data()->value().toString();
+        QString str = read(row, col).toString();
+
+        double w = str.length() * double(fs) / defaultPixelSize + 1; // width not perfect, but works reasonably well
+
+        if( (row >= firstRow) && (row <= lastRow))
+        {
+            if( w > colWidth.value(col))
+            {
+                colWidth.insert(col, int(w));
+            }
+        }
+    }
+
+    return colWidth;
+}
+
+
+/*!
+  Auto ets width in characters of columns with the given \a range.
+  Returns true on success.
+ */
+bool Document::autosizeColumnWidth(const CellRange &range)
+{
+    bool erg = false;
+
+    if( !range.isValid())
+    {
+        return false;
+    }
+
+    QMap<int, int> colWidth = getMaximalColumnWidth(range.firstRow(), range.lastRow());
+
+    foreach(int key, colWidth.keys())
+    {
+        if( (key >= range.firstColumn()) && (key <= range.lastColumn()) )
+        {
+            erg |= setColumnWidth(key, colWidth.value(key));
+        }
+    }
+
+    return erg;
+}
+
+
+/*!
+  Auto sets width in characters \a column . Columns are 1-indexed.
+  Returns true on success.
+ */
+bool Document::autosizeColumnWidth(int column)
+{
+    bool erg = false;
+
+    QMap<int, int> colWidth = getMaximalColumnWidth();
+
+    foreach(int key, colWidth.keys())
+    {
+        if( key == column)
+        {
+            erg |= setColumnWidth(key, colWidth.value(key));
+        }
+    }
+
+    return erg;
+}
+
+
+/*!
+  Auto sets width in characters for columns [\a colFirst, \a colLast]. Columns are 1-indexed.
+  Returns true on success.
+ */
+bool Document::autosizeColumnWidth(int colFirst, int colLast)
+{
+    bool erg = false;
+
+    QMap<int, int> colWidth = getMaximalColumnWidth();
+
+    foreach(int key, colWidth.keys())
+    {
+        if( (key >= colFirst) && (key <= colLast) )
+        {
+            erg |= setColumnWidth(key, colWidth.value(key));
+        }
+    }
+
+    return erg;
+}
+
+
+/*!
+  Auto sets width in characters for all columns.
+  Returns true on success.
+ */
+bool Document::autosizeColumnWidth(void)
+{
+    bool erg = false;
+
+    QMap<int, int> colWidth = getMaximalColumnWidth();
+
+    foreach(int key, colWidth.keys())
+    {
+        erg |= setColumnWidth(key, colWidth.value(key));
+    }
+
+    return erg;
+}
 
 
 QT_END_NAMESPACE_XLSX

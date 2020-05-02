@@ -5,16 +5,16 @@
 <p align="center"><img src="https://raw.githubusercontent.com/QtExcel/QXlsx/master/markdown.data/QXlsx-Desktop.png"></p>
 
 - QXlsx는 엑셀 파일(*.xlsx)을 읽고 쓰는 라이브러리입니다.
-- QtXlsx가 더이상 지원되지 않기 때문에(2014), QtXlsx에 기반한 새로운 프로젝트를 만들었습니다. (2017-)
-- QXlsx는 개발언어로 C++를 사용합니다. (Qt 사용)
+  - QtXlsx가 더 이상 지원되지 않기 때문에(2014), QtXlsx에 기반한 새로운 프로젝트를 만들었습니다. (2017-)
+- QXlsx는 개발언어로 C++을 사용합니다. (Qt 사용)
 - QXlsx는 정적 또는 동적 라이브러리를 사용하지 않아도 되도록 제작되었습니다.
+  - 물론 정적 라이브러리(static library)로 사용할 수도 있습니다.
 
 ## 사용하는 방법
-- [예제](Example.md)를 참조하세요.
+- [예제](Example.md) 또는 [위키](https://github.com/QtExcel/QXlsx/wiki) 를 참조하세요.
 	- HelloWorld : 헬로우 월드 예제 (가장 기본적인 구조)
 	- TestExcel : QtXlsx 예제에 기반한 기본 예제
 	- HelloAndroid : 안드로이드에서 xlsx 파일 열기
-	- Copycat : xlsx 파일을 읽어 위젯으로 표시. xlsx 파일 인쇄.
 	- WebServer : xlsx 파일을 읽어 웹으로 표시	
 	- ShowConsole : xlsx 파일을 읽어 콘솔에 표시
 
@@ -24,30 +24,31 @@
 
 ## 테스트 환경
 
-Travis CI | AppVeyor  | CodeFactor
-:-------: | :-------: | :--------:
-[![Build Status](https://travis-ci.com/QtExcel/QXlsx.svg?branch=master)](https://travis-ci.com/QtExcel/QXlsx) | [![Build status](https://ci.appveyor.com/api/projects/status/jkod8257gg66vm6e?svg=true)](https://ci.appveyor.com/project/QtExcel/qxlsx) | [![CodeFactor](https://www.codefactor.io/repository/github/qtexcel/qxlsx/badge)](https://www.codefactor.io/repository/github/qtexcel/qxlsx)
+| Travis CI (Linux) | AppVeyor (Windows) | CodeFactor | Github Actions <br> Linux/Win/Mac | iOS / Android  |
+| :---------------: | :----------------: | :--------: | :------------------------: | :----------------------------: |
+| [![Build Status](https://travis-ci.com/QtExcel/QXlsx.svg?branch=master)](https://travis-ci.com/QtExcel/QXlsx) | [![Build status](https://ci.appveyor.com/api/projects/status/jkod8257gg66vm6e?svg=true)](https://ci.appveyor.com/project/QtExcel/qxlsx) | [![CodeFactor](https://www.codefactor.io/repository/github/qtexcel/qxlsx/badge)](https://www.codefactor.io/repository/github/qtexcel/qxlsx) | [![Ubuntu](https://github.com/QtExcel/QXlsx/workflows/Ubuntu/badge.svg)](https://github.com/QtExcel/QXlsx/actions/Ubuntu)  [![MacOS](https://github.com/QtExcel/QXlsx/workflows/MacOS/badge.svg)](https://github.com/QtExcel/QXlsx/actions/MacOS)  [![Windows](https://github.com/QtExcel/QXlsx/workflows/Windows/badge.svg)](https://github.com/QtExcel/QXlsx/actions/Windows) | [![IOS](https://github.com/QtExcel/QXlsx/workflows/IOS/badge.svg)](https://github.com/QtExcel/QXlsx/actions/IOS)  [![Android](https://github.com/QtExcel/QXlsx/workflows/Android/badge.svg)](https://github.com/QtExcel/QXlsx/actions/Android) |  
+
 
 - [테스트된 환경](TestEnv.md) 참조
-
-## 이슈
-
-[![Waffle.io - Columns and their card count](https://badge.waffle.io/QtExcel/QXlsx.svg?columns=all)](https://waffle.io/QtExcel/QXlsx) 
 
 ## 할 일
 - [테스트 할 일](ToTest.md)
 - [업그레이드 할 일](ToUpgrade.md)
+- [비전](Vision.md)
 
 ## 컨트리뷰터
 - [컨트리뷰터](https://github.com/QtExcel/QXlsx/graphs/contributors) 참조.
 
 ## 라이센스와 링크
 - QXlsx 는 MIT 라이센스 입니다. [https://github.com/QtExcel/QXlsx](https://github.com/QtExcel/QXlsx)
-- QtXlsx 는 MIT 라이센스 입니다. [https://github.com/dbzhang800/QtXlsxWriter](https://github.com/dbzhang800/QtXlsxWriter)
-- Qt-Table-Printer 는 BSD 3-Clause 라이센스 입니다. [https://github.com/T0ny0/Qt-Table-Printer](https://github.com/T0ny0/Qt-Table-Printer) 
-- recurse 는 MIT 라이센스 입니다. [https://github.com/pkoretic/recurse](https://github.com/pkoretic/recurse)
-- libfort 는 MIT 라이센스 입니다. [https://github.com/seleznevae/libfort](https://github.com/seleznevae/libfort)
-- Qt 는 LGPL v3 라이센스 또는 상업용 라이센스 입니다. [https://www.qt.io/](https://www.qt.io/)
+- 다음과 같은 놀라운 프로젝트들을 만들어 주신 분들에게 감사의 말씀을 올립니다. :+1:
+  - Qt 는 LGPL v3 라이센스 또는 상업용 라이센스 입니다. [https://www.qt.io/](https://www.qt.io/)
+  - QtXlsx 는 MIT 라이센스 입니다. [https://github.com/dbzhang800/QtXlsxWriter](https://github.com/dbzhang800/QtXlsxWriter)
+  - Qt-Table-Printer 는 BSD 3-Clause 라이센스 입니다. [https://github.com/T0ny0/Qt-Table-Printer](https://github.com/T0ny0/Qt-Table-Printer) 
+  - recurse 는 MIT 라이센스 입니다. [https://github.com/pkoretic/recurse](https://github.com/pkoretic/recurse)
+  - libfort 는 MIT 라이센스 입니다. [https://github.com/seleznevae/libfort](https://github.com/seleznevae/libfort)
+  - colorprintf 는 MIT 라이센스 입니다. [https://github.com/VittGam/colorprintf](https://github.com/VittGam/colorprintf)
+  - HelloActions-Qt 는 MIT 라이센스 입니다. [https://github.com/jaredtao/HelloActions-Qt](https://github.com/jaredtao/HelloActions-Qt)  
 
 ## :email: 문의
 - 이슈를 남겨 주세요. [https://github.com/QtExcel/QXlsx/issues](https://github.com/QtExcel/QXlsx/issues)
@@ -62,15 +63,15 @@ Travis CI | AppVeyor  | CodeFactor
 <p align="center"><img src="https://github.com/QtExcel/Qxlnt/raw/master/markdown-data/Concept-QXlnt.jpg"></p>
 
 - Qxlnt는 xlnt가 Qt에서 사용될 수있게 해주는 도우미 프로젝트입니다.
-- xlnt는 xlsx Excel 파일을 사용하기에 훌륭한 C++ 라이브러리입니다. :+1:
+- xlnt는 xlsx Excel 파일을 사용하기에 훌륭한 C++ 라이브러리입니다.
 - xlnt를 Qt에서 사용하기 쉬운 방법을 찾고 있었습니다. 물론 cmake는 Qt와 호환되지만 사용하기가 쉽지 않습니다. 그래서 Qxlnt를 만들었습니다.
 
 ### :star: <b>Qlibxlsxwriter</b> [https://github.com/QtExcel/Qlibxlsxwriter](https://github.com/QtExcel/Qlibxlsxwriter)
 
 <p align="center"><img src="https://github.com/QtExcel/Qlibxlsxwriter/raw/master/markdown.data/logo.png"></p>
 
-- Qlibxlsxwriter는 libxlsxwriter를 Qt에서 사용할 수있는 도우미 프로젝트입니다.
-- libxlsxwriter는 Excel XLSX 파일을 만들기위한 C 라이브러리 입니다.	
+- Qlibxlsxwriter는 libxlsxwriter를 Qt에서 사용할 수 있는 도우미 프로젝트입니다.
+- libxlsxwriter는 Excel XLSX 파일을 만들기 위한 C 라이브러리 입니다.	
 
 ### :star: <b>QSimpleXlsxWriter</b> [https://github.com/QtExcel/QSimpleXlsxWriter](https://github.com/QtExcel/QSimpleXlsxWriter)
 

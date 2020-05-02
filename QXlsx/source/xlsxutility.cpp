@@ -27,12 +27,19 @@
 
 #include <QString>
 #include <QPoint>
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QRegularExpression>
+#else
+#include <QRegExp>
+#endif
 #include <QMap>
 #include <QStringList>
 #include <QColor>
 #include <QDateTime>
 #include <QDebug>
+
+#include <cmath>
+#include <string>
 
 QT_BEGIN_NAMESPACE_XLSX
 
@@ -100,24 +107,48 @@ double timeToNumber(const QTime &time)
     return QTime(0,0).msecsTo(time) / (1000*60*60*24.0);
 }
 
-QDateTime datetimeFromNumber(double num, bool is1904)
+QVariant datetimeFromNumber(double num, bool is1904)
 {
-    if (!is1904 && num > 60)
+    if (!is1904 && num > 60) // for mac os excel
+    {
         num = num - 1;
+    }
 
     qint64 msecs = static_cast<qint64>(num * 1000*60*60*24.0 + 0.5);
     QDateTime epoch(is1904 ? QDate(1904, 1, 1): QDate(1899, 12, 31), QTime(0,0));
 
-    QDateTime dt = epoch.addMSecs(msecs);
+    QDateTime dtRet; // return value
+
+    QDateTime dtOld = epoch.addMSecs(msecs);
+    dtRet = dtOld;
 
 #if QT_VERSION >= 0x050200
     // Remove one hour to see whether the date is Daylight
-    QDateTime dt2 = dt.addMSecs(-3600);
-    if (dt2.isDaylightTime())
-        return dt2;
+    QDateTime dtNew = dtRet.addMSecs(-3600);
+    if ( dtNew.isDaylightTime() )
+    {
+        dtRet = dtNew;
+    }
 #endif
 
-    return dt;
+    float whole = 0;
+    float fractional = std::modf(num, &whole);
+
+    if ( num < double(1) )
+    {
+        // only time
+        QTime t = dtRet.time();
+        return QVariant(t);
+    }
+
+    if ( fractional == 0.0 )
+    {
+        // only date
+        QDate onlyDT = dtRet.date();
+        return QVariant(onlyDT);
+    }
+
+    return QVariant(dtRet);
 }
 
 /*
@@ -139,8 +170,13 @@ QString createSafeSheetName(const QString &nameProposal)
         ret = unescapeSheetName(ret);
 
     //Replace invalid chars with space.
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     if (nameProposal.contains(QRegularExpression(QStringLiteral("[/\\\\?*\\][:]"))))
         ret.replace(QRegularExpression(QStringLiteral("[/\\\\?*\\][:]")), QStringLiteral(" "));
+#else
+    if (nameProposal.contains(QRegExp(QLatin1String("[/\\\\?*\\][:]"))))
+        ret.replace(QRegExp(QLatin1String("[/\\\\?*\\][:]")), QLatin1String(" "));
+#endif
     if (ret.startsWith(QLatin1Char('\'')))
         ret[0] = QLatin1Char(' ');
     if (ret.endsWith(QLatin1Char('\'')))
@@ -160,8 +196,13 @@ QString escapeSheetName(const QString &sheetName)
     Q_ASSERT(!sheetName.startsWith(QLatin1Char('\'')) && !sheetName.endsWith(QLatin1Char('\'')));
 
     //These is no need to escape
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     if (!sheetName.contains(QRegularExpression(QStringLiteral("[ +\\-,%^=<>'&]"))))
         return sheetName;
+#else
+    if (!sheetName.contains(QRegExp(QLatin1String("[ +\\-,%^=<>'&]"))))
+        return sheetName;
+#endif
 
     //OK, escape is needed.
     QString name = sheetName;

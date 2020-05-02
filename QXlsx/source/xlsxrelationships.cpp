@@ -29,7 +29,7 @@
 #include <QFile>
 #include <QBuffer>
 
-namespace QXlsx {
+QT_BEGIN_NAMESPACE_XLSX
 
 const QString schema_doc = QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/relationships");
 const QString schema_msPackage = QStringLiteral("http://schemas.microsoft.com/office/2006/relationships");
@@ -92,7 +92,7 @@ QList<XlsxRelationship> Relationships::relationships(const QString &type) const
 void Relationships::addRelationship(const QString &type, const QString &target, const QString &targetMode)
 {
     XlsxRelationship relation;
-    relation.id = QStringLiteral("rId%1").arg(m_relationships.size()+1);
+    relation.id = QString("rId%1").arg(m_relationships.size()+1);
     relation.type = type;
     relation.target = target;
     relation.targetMode = targetMode;
@@ -186,4 +186,4 @@ bool Relationships::isEmpty() const
     return m_relationships.isEmpty();
 }
 
-} //namespace
+QT_END_NAMESPACE_XLSX

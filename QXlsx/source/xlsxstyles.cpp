@@ -1,15 +1,4 @@
-//--------------------------------------------------------------------
-//
-// QXlsx
-// MIT License
-// https://github.com/j2doll/QXlsx
-//
-// QtXlsx
-// https://github.com/dbzhang800/QtXlsxWriter
-// http://qtxlsx.debao.me/
-// MIT License
-
-
+// xlsxstyles.cpp 
 
 #include "xlsxstyles_p.h"
 #include "xlsxformat_p.h"
@@ -23,7 +12,7 @@
 #include <QDebug>
 #include <QBuffer>
 
-namespace QXlsx {
+QT_BEGIN_NAMESPACE_XLSX
 
 /*
   When loading from existing .xlsx file. we should create a clean styles object.
@@ -37,7 +26,13 @@ Styles::Styles(CreateFlag flag)
     //!Fix me. Should the custom num fmt Id starts with 164 or 176 or others??
 
     //!Fix me! Where should we put these register code?
-    if (QMetaType::type("XlsxColor") == QMetaType::UnknownType) {
+
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
+    if (QMetaType::type("XlsxColor") == QMetaType::UnknownType)
+#else
+    if (!QMetaType::isRegistered(QMetaType::type("XlsxColor")))
+#endif
+    {
         qRegisterMetaType<XlsxColor>("XlsxColor");
         qRegisterMetaTypeStreamOperators<XlsxColor>("XlsxColor");
 #if QT_VERSION >= 0x050200
@@ -78,17 +73,20 @@ Format Styles::dxfFormat(int idx) const
     return m_dxf_formatsList[idx];
 }
 
+// dev74 issue#57
 void Styles::fixNumFmt(const Format &format)
 {
     if (!format.hasNumFmtData())
         return;
 
     if (format.hasProperty(FormatPrivate::P_NumFmt_Id)
-            && !format.stringProperty(FormatPrivate::P_NumFmt_FormatCode).isEmpty()) {
+            && !format.stringProperty(FormatPrivate::P_NumFmt_FormatCode).isEmpty())
+    {
         return;
     }
 
-    if (m_builtinNumFmtsHash.isEmpty()) {
+    if ( m_builtinNumFmtsHash.isEmpty() )
+    {
         m_builtinNumFmtsHash.insert(QStringLiteral("General"), 0);
         m_builtinNumFmtsHash.insert(QStringLiteral("0"), 1);
         m_builtinNumFmtsHash.insert(QStringLiteral("0.00"), 2);
@@ -126,16 +124,26 @@ void Styles::fixNumFmt(const Format &format)
         m_builtinNumFmtsHash.insert(QStringLiteral("mm:ss.0"), 47);
         m_builtinNumFmtsHash.insert(QStringLiteral("##0.0E+0"), 48);
         m_builtinNumFmtsHash.insert(QStringLiteral("@"), 49);
+
+        // dev74
+        // m_builtinNumFmtsHash.insert(QStringLiteral("0.####"), 176);
+
     }
 
     const QString str = format.numberFormat();
-    if (!str.isEmpty()) {
+    if (!str.isEmpty())
+    {
         //Assign proper number format index
-        if (m_builtinNumFmtsHash.contains(str)) {
+        if ( m_builtinNumFmtsHash.contains(str) )
+        {
             const_cast<Format *>(&format)->fixNumberFormat(m_builtinNumFmtsHash[str], str);
-        } else if (m_customNumFmtsHash.contains(str)) {
+        }
+        else if (m_customNumFmtsHash.contains(str))
+        {
             const_cast<Format *>(&format)->fixNumberFormat(m_customNumFmtsHash[str]->formatIndex, str);
-        } else {
+        }
+        else
+        {
             //Assign a new fmt Id.
             const_cast<Format *>(&format)->fixNumberFormat(m_nextCustomNumFmtId, str);
 
@@ -147,24 +155,32 @@ void Styles::fixNumFmt(const Format &format)
 
             m_nextCustomNumFmtId += 1;
         }
-    } else {
+    }
+    else
+    {
         int id = format.numberFormatIndex();
         //Assign proper format code, this is needed by dxf format
-        if (m_customNumFmtIdMap.contains(id)) {
+        if (m_customNumFmtIdMap.contains(id))
+        {
             const_cast<Format *>(&format)->fixNumberFormat(id, m_customNumFmtIdMap[id]->formatString);
-        } else {
+        }
+        else
+        {
             QHashIterator<QString, int> it(m_builtinNumFmtsHash);
-            bool find=false;
-            while (it.hasNext()) {
+            bool find = false;
+            while (it.hasNext())
+            {
                 it.next();
-                if (it.value() == id) {
+                if (it.value() == id)
+                {
                     const_cast<Format *>(&format)->fixNumberFormat(id, it.key());
                     find = true;
                     break;
                 }
             }
 
-            if (!find) {
+            if (!find)
+            {
                 //Wrong numFmt
                 const_cast<Format *>(&format)->fixNumberFormat(id, QStringLiteral("General"));
             }
@@ -181,26 +197,34 @@ void Styles::fixNumFmt(const Format &format)
 */
 void Styles::addXfFormat(const Format &format, bool force)
 {
-    if (format.isEmpty()) {
+    if (format.isEmpty())
+    {
         //Try do something for empty Format.
         if (m_emptyFormatAdded && !force)
             return;
+
         m_emptyFormatAdded = true;
     }
 
     //numFmt
-    if (format.hasNumFmtData() && !format.hasProperty(FormatPrivate::P_NumFmt_Id))
+    if (format.hasNumFmtData() &&
+            !format.hasProperty(FormatPrivate::P_NumFmt_Id))
+    {
         fixNumFmt(format);
+    }
 
     //Font
-    if (format.hasFontData() && !format.fontIndexValid()) {
+    if (format.hasFontData() && !format.fontIndexValid())
+    {
         //Assign proper font index, if has font data.
         if (!m_fontsHash.contains(format.fontKey()))
             const_cast<Format *>(&format)->setFontIndex(m_fontsList.size());
         else
             const_cast<Format *>(&format)->setFontIndex(m_fontsHash[format.fontKey()].fontIndex());
     }
-    if (!m_fontsHash.contains(format.fontKey())) {
+
+    if (!m_fontsHash.contains(format.fontKey()))
+    {
         //Still a valid font if the format has no fontData. (All font properties are default)
         m_fontsList.append(format);
         m_fontsHash[format.fontKey()] = format;
@@ -235,13 +259,17 @@ void Styles::addXfFormat(const Format &format, bool force)
     }
 
     //Format
-    if (!format.isEmpty() && !format.xfIndexValid()) {
+    if (!format.isEmpty() && !format.xfIndexValid())
+    {
         if (m_xf_formatsHash.contains(format.formatKey()))
             const_cast<Format *>(&format)->setXfIndex(m_xf_formatsHash[format.formatKey()].xfIndex());
         else
             const_cast<Format *>(&format)->setXfIndex(m_xf_formatsList.size());
     }
-    if (!m_xf_formatsHash.contains(format.formatKey()) || force) {
+
+    if (!m_xf_formatsHash.contains(format.formatKey()) ||
+            force)
+    {
         m_xf_formatsList.append(format);
         m_xf_formatsHash[format.formatKey()] = format;
     }
@@ -250,18 +278,29 @@ void Styles::addXfFormat(const Format &format, bool force)
 void Styles::addDxfFormat(const Format &format, bool force)
 {
     //numFmt
-    if (format.hasNumFmtData())
+    if ( format.hasNumFmtData() )
+    {
         fixNumFmt(format);
-
-    if (!format.isEmpty() && !format.dxfIndexValid()) {
-        if (m_dxf_formatsHash.contains(format.formatKey()))
-            const_cast<Format *>(&format)->setDxfIndex(m_dxf_formatsHash[format.formatKey()].dxfIndex());
-        else
-            const_cast<Format *>(&format)->setDxfIndex(m_dxf_formatsList.size());
     }
-    if (!m_dxf_formatsHash.contains(format.formatKey()) || force) {
+
+    if ( !format.isEmpty() &&
+            !format.dxfIndexValid() )
+    {
+        if (m_dxf_formatsHash.contains(format.formatKey()))
+        {
+            const_cast<Format *>(&format)->setDxfIndex( m_dxf_formatsHash[format.formatKey()].dxfIndex() );
+        }
+        else
+        {
+            const_cast<Format *>(&format)->setDxfIndex( m_dxf_formatsList.size() );
+        }
+    }
+
+    if ( !m_dxf_formatsHash.contains(format.formatKey()) ||
+         force )
+    {
         m_dxf_formatsList.append(format);
-        m_dxf_formatsHash[format.formatKey()] = format;
+        m_dxf_formatsHash[ format.formatKey() ] = format;
     }
 }
 
@@ -998,7 +1037,7 @@ bool Styles::readBorder(QXmlStreamReader &reader, Format &border)
 
 bool Styles::readCellStyleXfs(QXmlStreamReader &reader)
 {
-
+    Q_UNUSED(reader);
     return true;
 }
 
@@ -1175,7 +1214,7 @@ bool Styles::readCellXfs(QXmlStreamReader &reader)
                         }
 
                         if (alignAttrs.hasAttribute(QLatin1String("wrapText")))
-                            format.setTextWarp(true);
+                            format.setTextWrap(true);
 
                         if (alignAttrs.hasAttribute(QLatin1String("shrinkToFit")))
                             format.setShrinkToFit(true);
@@ -1343,4 +1382,4 @@ QColor Styles::getColorByIndex(int idx)
     return m_indexedColors[idx];
 }
 
-} //namespace QXlsx
+QT_END_NAMESPACE_XLSX

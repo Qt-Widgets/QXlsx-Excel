@@ -19,6 +19,7 @@ using namespace QXlsx;
 extern int hello();
 extern int calendar();
 extern int chart();
+extern int chartExtended();
 extern int chartsheet();
 extern int datavalidation();
 extern int definename();
@@ -54,8 +55,9 @@ int main(int argc, char *argv[])
 	hello();
 	readStyle();
 	calendar();
-	chart();
-	chartsheet();
+    chart();
+    chartExtended();
+    chartsheet();
 	datavalidation();
 	definename();
 	demo();
@@ -72,5 +74,7 @@ int main(int argc, char *argv[])
 	worksheetoperations();
     pages();
 	
+    qDebug() << "**** end of main() ****";
+
 	return 0;
 }

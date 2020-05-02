@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include <QtGlobal>
+#include <QDebug>
 #include <QDateTime>
 #include <QDate>
 #include <QTime>
@@ -115,68 +117,90 @@ QVariant Cell::readValue() const
 	ret = d->value;
 
 	Format fmt = this->format();
-	int noFormatIndex = fmt.numberFormatIndex(); 
 
 	if (isDateTime())
 	{
-		QDateTime dt = dateTime(); 
-		ret = dt;
+        QVariant vDT = dateTime();
+        if ( vDT.isNull() )
+        {
+            return QVariant();
+        }
+
+        if ( vDT.type() == QVariant::DateTime )
+        {
+            ret = vDT;
+        }
+        else if ( vDT.type() == QVariant::Date )
+        {
+            ret = vDT;
+        }
+        else if ( vDT.type() == QVariant::Time )
+        {
+            ret = vDT;
+        }
+        else
+        {
+            return QVariant();
+        }
+
+        // QDateTime dt = dateTime();
+        // ret = dt;
 		
-		QString strFormat = fmt.numberFormat();
-		if (!strFormat.isEmpty())
-		{
-			// TODO: use number format 
-		}
+        // QString strFormat = fmt.numberFormat();
+        // if (!strFormat.isEmpty())
+        // {
+        // 	// TODO: use number format
+        // }
 
-		qint32 styleNo = d->styleNumber;
+        // qint32 styleNo = d->styleNumber;
 
-		if (styleNo == 10)
-		{
-		}
+        // if (styleNo == 10)
+        // {
+        // }
 
-		if (styleNo == 11) 
-		{
+        // if (styleNo == 11)
+        // {
 			// QTime timeValue = dt.time(); // only time. (HH:mm:ss) 
 			// ret = timeValue;
 			// return ret;
-		}
+        // }
 
-		if (styleNo == 12) 
-		{
-		}
+        // if (styleNo == 12)
+        // {
+        // }
 
-		if (styleNo == 13) // (HH:mm:ss) 
-		{
-			double dValue = d->value.toDouble(); 
-			int day = int(dValue); // unit is day. 
-			double deciamlPointValue1 = dValue - double(day);
+        // if (styleNo == 13) // (HH:mm:ss)
+        // {
+            // double dValue = d->value.toDouble();
+            // int day = int(dValue); // unit is day.
+            // double deciamlPointValue1 = dValue - double(day);
 
-			double dHour = deciamlPointValue1 * (double(1.0) / double(24.0));
-			int hour = int(dHour);
+            // double dHour = deciamlPointValue1 * (double(1.0) / double(24.0));
+            // int hour = int(dHour);
 
-			double deciamlPointValue2 = deciamlPointValue1 - (double(hour) * (double(1.0) / double(24.0)));
-			double dMin = deciamlPointValue2 * (double(1.0) / double(60.0));
-			int min = int(dMin);
+            // double deciamlPointValue2 = deciamlPointValue1 - (double(hour) * (double(1.0) / double(24.0)));
+            // double dMin = deciamlPointValue2 * (double(1.0) / double(60.0));
+            // int min = int(dMin);
 
-			double deciamlPointValue3 = deciamlPointValue2 - (double(min) * (double(1.0) / double(60.0)));
-			double dSec = deciamlPointValue3 * (double(1.0) / double(60.0));
-			int sec = int(dSec);
+            // double deciamlPointValue3 = deciamlPointValue2 - (double(min) * (double(1.0) / double(60.0)));
+            // double dSec = deciamlPointValue3 * (double(1.0) / double(60.0));
+            // int sec = int(dSec);
 	
-			int totalHour = hour + (day * 24);
+            // int totalHour = hour + (day * 24);
 
-			QString strTime;
-			strTime = QString("%1:%2:%3").arg(totalHour).arg(min).arg(sec);
-			ret = strTime;
+            // QString strTime;
+            // strTime = QString("%1:%2:%3").arg(totalHour).arg(min).arg(sec);
+            // ret = strTime;
 
-			return ret;
-		}
+            // return ret;
+        // }
 
-		return ret; 
+        // return ret;
+        // */
 	}
 
 	if (hasFormula())
 	{
-		// QVariant::Type vt = ret.type(); // it's double type.  
 		QString formulaString = this->formula().formulaText();
 		ret = formulaString;
 		return ret; // return formula string 
@@ -223,18 +247,23 @@ bool Cell::isDateTime() const
 	Q_D(const Cell);
 
 	Cell::CellType cellType = d->cellType;
-	double dValue = d->value.toDouble();
+    double dValue = d->value.toDouble(); // number
 	QString strValue = d->value.toString().toUtf8(); 
 	bool isValidFormat = d->format.isValid();
-	bool isDateTimeFormat = d->format.isDateTimeFormat();
+    bool isDateTimeFormat = d->format.isDateTimeFormat(); // datetime format
 
-	if ( cellType == NumberType && 
-		 dValue >= 0 &&
-		 isValidFormat &&
-		 isDateTimeFormat )
-	{
-		return true;
-	}
+    // dev67
+    if ( cellType == NumberType ||
+         cellType == DateType ||
+         cellType == CustomType )
+    {
+        if ( dValue >= 0 &&
+             isValidFormat &&
+             isDateTimeFormat )
+        {
+            return true;
+        }
+    }
 
 	return false;
 }
@@ -242,6 +271,7 @@ bool Cell::isDateTime() const
 /*!
  * Return the data time value.
  */
+/*
 QDateTime Cell::dateTime() const
 {
 	Q_D(const Cell);
@@ -251,6 +281,24 @@ QDateTime Cell::dateTime() const
 
 	return datetimeFromNumber(d->value.toDouble(), d->parent->workbook()->isDate1904());
 }
+*/
+QVariant Cell::dateTime() const
+{
+    Q_D(const Cell);
+
+    if (!isDateTime())
+    {
+        return QVariant();
+    }
+
+    // dev57
+
+    QVariant ret;
+    double dValue = d->value.toDouble();
+    bool isDate1904 = d->parent->workbook()->isDate1904();
+    ret = datetimeFromNumber(dValue, isDate1904);
+    return ret;
+}
 
 /*!
  * Returns whether the cell is probably a rich string or not
@@ -259,9 +307,12 @@ bool Cell::isRichString() const
 {
 	Q_D(const Cell);
 
-	if (d->cellType != SharedStringType && d->cellType != InlineStringType
-			&& d->cellType != StringType)
+    if ( d->cellType != SharedStringType &&
+            d->cellType != InlineStringType &&
+            d->cellType != StringType )
+    {
 		return false;
+    }
 
 	return d->richString.isRichString();
 }

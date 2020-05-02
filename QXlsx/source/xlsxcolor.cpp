@@ -18,8 +18,7 @@
 #include <QXmlStreamWriter>
 #include <QDebug>
 
-namespace QXlsx {
-
+QT_BEGIN_NAMESPACE_XLSX
 
 XlsxColor::XlsxColor(const QColor &color)
 {
@@ -143,7 +142,13 @@ QColor XlsxColor::fromARGBString(const QString &c)
 QString XlsxColor::toARGBString(const QColor &c)
 {
     QString color;
+
+#if QT_VERSION >= 0x050600 // Qt 5.6 or over
+    color = QString::asprintf("%02X%02X%02X%02X", c.alpha(), c.red(), c.green(), c.blue());
+#else
     color.sprintf("%02X%02X%02X%02X", c.alpha(), c.red(), c.green(), c.blue());
+#endif
+
     return color;
 }
 
@@ -199,11 +204,12 @@ QDebug operator<<(QDebug dbg, const XlsxColor &c)
     else if (c.isIndexedColor())
         dbg.nospace() << "XlsxColor(indexed," << c.indexedColor() << ")";
     else if (c.isThemeColor())
-        dbg.nospace() << "XlsxColor(theme," << c.themeColor().join(QLatin1Char(':')) << ")";
+        dbg.nospace() << "XlsxColor(theme," << c.themeColor().join(QLatin1String(":")) << ")";
 
     return dbg.space();
 }
 
 #endif
 
-} // namespace QXlsx
+
+QT_END_NAMESPACE_XLSX

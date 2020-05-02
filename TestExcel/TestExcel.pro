@@ -1,8 +1,4 @@
-##########################################################################
 # TestExcel.pro
-#
-# QXlsx # MIT License # https://github.com/QtExcel/QXlsx
-## QtXlsx # MIT License # https://github.com/dbzhang800/QtXlsxWriter # http://qtxlsx.debao.me/
 
 TARGET = TestExcel
 TEMPLATE = app
@@ -40,6 +36,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
 calendar.cpp \
 chart.cpp \
+    chartextended.cpp \
 chartsheet.cpp \
 datavalidation.cpp \
 definename.cpp \

@@ -42,7 +42,11 @@
 #include <QVector>
 #include <QImage>
 #include <QSharedPointer>
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
 #include <QRegularExpression>
+#else
+#include <QRegExp>
+#endif
 
 #include "xlsxworksheet.h"
 #include "xlsxabstractsheet_p.h"
@@ -137,16 +141,30 @@ struct XlsxRowInfo
 
 struct XlsxColumnInfo
 {
-    XlsxColumnInfo(int firstColumn=0, int lastColumn=1, double width=0, const Format &format=Format(), bool hidden=false) :
-        firstColumn(firstColumn), lastColumn(lastColumn), customWidth(false), width(width), format(format), hidden(hidden)
-      , outlineLevel(0), collapsed(false)
+    XlsxColumnInfo( int firstColumn, // = 0,
+                    int lastColumn, // = 1,
+                    bool isSetWidth,
+                    double width = 0,
+                    const Format &format = Format(),
+                    bool hidden = false)
+        : firstColumn(firstColumn),
+          lastColumn(lastColumn),
+          customWidth(false),
+          isSetWidth(isSetWidth),
+          width(width),
+          format(format),
+          hidden(hidden),
+          outlineLevel(0),
+          collapsed(false)
     {
 
     }
+
     int firstColumn;
     int lastColumn;
     bool customWidth;
-    double width;    
+    double width;
+    bool isSetWidth;
     Format format;
     bool hidden;
     int outlineLevel;
@@ -263,7 +281,11 @@ public:
     bool showOutlineSymbols;
     bool showWhiteSpace;
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 0, 0 )
     QRegularExpression urlPattern;
+#else
+    QRegExp urlPattern;
+#endif
 
 private:
 
